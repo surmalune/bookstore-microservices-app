@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//TODO: использовать хаетос
+//TODO: использовать HATEOAS
 //TODO: класс исключений
 
 @RestController
