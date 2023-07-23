@@ -9,7 +9,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.mywebapps</groupId>
+    <groupId>com.bookstore</groupId>
     <artifactId>catalog-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>catalog-service</name>
