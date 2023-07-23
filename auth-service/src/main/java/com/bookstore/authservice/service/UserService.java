@@ -27,8 +27,8 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException
-    {
+            throws UsernameNotFoundException {
+
         return userRepository.findByUsername(username)
                              .orElseThrow(() -> new UsernameNotFoundException(
                                      String.format("User '%s' not found", username)
@@ -36,8 +36,9 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDetails createUser(RegisterUserRequest registerUserRequest)
-            throws UsernameAlreadyExistsException, EmailAlreadyExistsException
-    {
+            throws  UsernameAlreadyExistsException,
+                    EmailAlreadyExistsException {
+
         if (userRepository.existsByUsername(registerUserRequest.getUsername()))
             throw new UsernameAlreadyExistsException(
                     String.format("Username '%s' already exists", registerUserRequest.getUsername())
@@ -53,7 +54,7 @@ public class UserService implements UserDetailsService {
                         .password(passwordEncoder.encode(registerUserRequest.getPassword()))
                         .email(registerUserRequest.getEmail())
                         .createdAt(Instant.now())
-                        .roles(Set.of(Role.USER))
+                        .roles(Set.of(Role.USER))   // TODO: set roles
                         .build();
 
         return userRepository.save(user);

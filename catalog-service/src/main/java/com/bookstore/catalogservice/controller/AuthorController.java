@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Optional;
+import java.util.NoSuchElementException;
 
 //TODO: исключения
 //TODO: put, delete
@@ -30,23 +30,27 @@ public class AuthorController {
 
     @PostMapping
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid CreateAuthorRequest createAuthorRequest) {
-        Optional<AuthorResponse> authorResponse = authorService.createAuthor(createAuthorRequest);
+
+        AuthorResponse authorResponse = authorService.createAuthor(createAuthorRequest);
 
         URI location = MvcUriComponentsBuilder.fromController(getClass())
                                               .path("/{id}")
-                                              .buildAndExpand(authorResponse.orElseThrow(null).getId())  //TODO: null??
+                                              .buildAndExpand(authorResponse.getId())
                                               .toUri();
 
-        return ResponseEntity.created(location).body(authorResponse.get());
+        return ResponseEntity.created(location).body(authorResponse);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuthorResponse> getAuthor(@PathVariable String id) {
+    public ResponseEntity<AuthorResponse> getAuthor(@PathVariable String id)
+            throws NoSuchElementException {
+
         return authorService.getById(id)
                             .map(ResponseEntity::ok)
-                            .orElse(ResponseEntity.notFound().build());
+                            .orElseThrow(() -> new NoSuchElementException("author not found"));
     }
 
+    // TODO: if list is empty, should i return not_found or just return empty list?
     @GetMapping
     public ResponseEntity<CollectionModel<AuthorResponse>> listAuthors() {
         return new ResponseEntity<>(

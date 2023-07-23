@@ -7,7 +7,7 @@ import org.springframework.hateoas.CollectionModel;
 import java.util.Optional;
 
 public interface AuthorService {
-    Optional<AuthorResponse> createAuthor(CreateAuthorRequest createAuthorRequest);
+    AuthorResponse createAuthor(CreateAuthorRequest createAuthorRequest);
 
     Optional<AuthorResponse> getById(String id);
 

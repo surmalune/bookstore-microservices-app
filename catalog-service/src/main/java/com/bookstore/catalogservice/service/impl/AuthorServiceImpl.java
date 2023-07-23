@@ -31,17 +31,19 @@ public class AuthorServiceImpl implements AuthorService {
     }
 
     @Override
-    public Optional<AuthorResponse> createAuthor(CreateAuthorRequest createAuthorRequest) {
+    public AuthorResponse createAuthor(CreateAuthorRequest createAuthorRequest) {
         Author author = requestMapper.toAuthor(createAuthorRequest);
         authorRepository.save(author);
 
         //log.info("Author named {} is added", createAuthorRequest.getName());
 
-        return Optional.of(authorResponseAssembler.toModel(author));
+        return authorResponseAssembler.toModel(author);
     }
 
+    // TODO: should i return empty list or throw exception?
     @Override
-    public CollectionModel<AuthorResponse> listAuthors() {
+    public CollectionModel<AuthorResponse> listAuthors()
+    {
         List<Author> authors = authorRepository.findAll();
         return authorResponseAssembler.toCollectionModel(authors);
     }

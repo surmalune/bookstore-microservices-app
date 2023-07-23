@@ -12,6 +12,7 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 //TODO: Логирование
@@ -33,13 +34,13 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public Optional<BookResponse> createBook(CreateBookRequest createBookRequest) {
+    public BookResponse createBook(CreateBookRequest createBookRequest) {
         Book book = requestMapper.toBook(createBookRequest);
         bookRepository.save(book);
 
         //log.info("Book {} is saved", createBookRequest.getTitle());
 
-        return Optional.of(bookResponseAssembler.toModel(book));
+        return bookResponseAssembler.toModel(book);
     }
 
     @Override
@@ -55,8 +56,14 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public CollectionModel<BookResponse> listBooksByAuthorName(String name) {
+    public CollectionModel<BookResponse> listBooksByAuthorName(String name)
+            throws NoSuchElementException {
+
         List<Book> books = bookRepository.findAllByAuthorsName(name);
+
+        if (books.isEmpty())
+            throw new NoSuchElementException("no books with such author");
+
         return bookResponseAssembler.toCollectionModel(books);
     }
 

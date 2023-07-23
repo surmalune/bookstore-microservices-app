@@ -1,4 +1,4 @@
-package com.bookstore.authservice.exception;
+package com.bookstore.catalogservice.dto;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -9,14 +9,12 @@ import java.util.Date;
 @Setter
 @Getter
 @RequiredArgsConstructor
-public class AppError {
+public class ErrorMessage {
 
-    private int status;
     private String message;
     private Date timestamp;
 
-    public AppError(int status, String message) {
-        this.status = status;
+    public ErrorMessage(String message) {
         this.message = message;
         this.timestamp = new Date();
     }

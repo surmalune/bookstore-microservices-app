@@ -5,6 +5,8 @@ import com.bookstore.authservice.dto.AuthenticateUserResponse;
 import com.bookstore.authservice.dto.RegisterUserRequest;
 import com.bookstore.authservice.dto.RegisterUserResponse;
 import com.bookstore.authservice.entity.User;
+import com.bookstore.authservice.exception.EmailAlreadyExistsException;
+import com.bookstore.authservice.exception.UsernameAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,10 +14,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,38 +26,38 @@ public class AuthService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public Optional<RegisterUserResponse> register(RegisterUserRequest request) {
+    public RegisterUserResponse register(RegisterUserRequest request)
+            throws  EmailAlreadyExistsException,
+                    UsernameAlreadyExistsException {
 
-        User user = (User) userService.createUser(request);
+        User user = (User) userService.createUser(request);     // TODO: should i cast UserDetails to User??
 
-        return Optional.of(RegisterUserResponse.builder()
+        return RegisterUserResponse.builder()
                                                .id(user.getId())
                                                .username(user.getUsername())
                                                .email(user.getEmail())
                                                .createdAt(user.getCreatedAt())
                                                .roles(user.getRoles())
-                                               .build()
-        );
+                                               .build();
     }
 
+    // TODO: Transactional or..? Check best practices
     @Transactional
-    public Optional<AuthenticateUserResponse> authenticate(AuthenticateUserRequest request) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUsername(),
-                            request.getPassword()
-                    ));
+    public AuthenticateUserResponse authenticate(AuthenticateUserRequest request)
+            throws  BadCredentialsException,
+                    UsernameNotFoundException {
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        } catch (BadCredentialsException e) {
-            e.printStackTrace();
-            //return new ResponseEntity<>(new AppError(HttpStatus.UNAUTHORIZED.value(), "Неправильный логин или пароль"), HttpStatus.UNAUTHORIZED);
-        }
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                ));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
         String token = jwtService.generateToken(userDetails);
 
-        return Optional.of(new AuthenticateUserResponse(token));
+        return new AuthenticateUserResponse(token);
     }
 }

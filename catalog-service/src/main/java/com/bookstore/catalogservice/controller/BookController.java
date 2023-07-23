@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 //TODO: исключения
@@ -30,21 +31,21 @@ public class BookController {
 
     @PostMapping
     public ResponseEntity<BookResponse> createBook(@RequestBody @Valid CreateBookRequest createBookRequest) {
-        Optional<BookResponse> bookResponse = bookService.createBook(createBookRequest);
+        BookResponse bookResponse = bookService.createBook(createBookRequest);
 
         URI location = MvcUriComponentsBuilder.fromController(getClass())
                                               .path("/{id}")
-                                              .buildAndExpand(bookResponse.orElseThrow(null).getId())
+                                              .buildAndExpand(bookResponse.getId())
                                               .toUri();
 
-        return ResponseEntity.created(location).body(bookResponse.get());
+        return ResponseEntity.created(location).body(bookResponse);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<BookResponse> getBook(@PathVariable String id) {
         return bookService.getById(id)
                           .map(ResponseEntity::ok)
-                          .orElse(ResponseEntity.notFound().build());
+                          .orElseThrow(() -> new NoSuchElementException("book not found"));
 
     }
 
@@ -55,9 +56,10 @@ public class BookController {
                 HttpStatus.OK);
     }
 
-    // TODO: больше параметров поиска
     @GetMapping("/find")
-    public ResponseEntity<CollectionModel<BookResponse>> listBooksByAuthorName(@RequestParam(name = "authorName") String name) {
+    public ResponseEntity<CollectionModel<BookResponse>> listBooksByAuthorName(@RequestParam(name = "authorName") String name)
+            throws NoSuchElementException {
+
         return new ResponseEntity<>(
                 bookService.listBooksByAuthorName(name),
                 HttpStatus.OK);
