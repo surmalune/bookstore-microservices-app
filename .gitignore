@@ -1,0 +1,11 @@
+/shelf/
+
+.idea/
+
+**/target/
+**/META-INF/
+**/HELP.md
+
+**/.mvn/
+**/mvnw
+**/mvnw.cmd

@@ -1,0 +1,23 @@
+server:
+  port: 8080
+jwt:
+  secret: eqSizeUB8H6FvDRzJsuKvzV4sKyR1xf5
+  expiration: 15m
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/auth
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        formal_sql: true
+        schema_update:
+          unique_constraint_strategy: RECREATE_QUIETLY
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
