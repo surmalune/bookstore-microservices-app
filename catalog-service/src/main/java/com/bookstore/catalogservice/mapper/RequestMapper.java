@@ -5,6 +5,7 @@ import com.bookstore.catalogservice.dto.CreateBookRequest;
 import com.bookstore.catalogservice.entity.Author;
 import com.bookstore.catalogservice.entity.Book;
 import com.bookstore.catalogservice.repository.AuthorRepository;
+import lombok.RequiredArgsConstructor;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,9 @@ import java.util.stream.Collectors;
 
 @Component
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@RequiredArgsConstructor
 public abstract class RequestMapper {
 
-    @Autowired
     protected AuthorRepository authorRepository;
 
     public abstract Author toAuthor(CreateAuthorRequest createAuthorRequest);

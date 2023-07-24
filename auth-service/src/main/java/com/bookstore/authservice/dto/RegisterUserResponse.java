@@ -3,6 +3,7 @@ package com.bookstore.authservice.dto;
 import com.bookstore.authservice.entity.Role;
 import lombok.*;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Collection;
 
@@ -11,7 +12,7 @@ import java.util.Collection;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class RegisterUserResponse {
+public class RegisterUserResponse implements Serializable {
 
     private String id;
     private String username;

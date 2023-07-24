@@ -8,6 +8,7 @@ import com.bookstore.authservice.entity.User;
 import com.bookstore.authservice.exception.EmailAlreadyExistsException;
 import com.bookstore.authservice.exception.UsernameAlreadyExistsException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
 
     private final UserService userService;
@@ -52,6 +54,7 @@ public class AuthService {
                         request.getUsername(),
                         request.getPassword()
                 ));
+        log.info("User with username {} authenticated", request.getUsername());
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

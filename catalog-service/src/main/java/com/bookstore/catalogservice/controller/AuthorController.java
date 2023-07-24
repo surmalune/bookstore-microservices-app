@@ -4,7 +4,7 @@ import com.bookstore.catalogservice.dto.AuthorResponse;
 import com.bookstore.catalogservice.dto.CreateAuthorRequest;
 import com.bookstore.catalogservice.service.AuthorService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +17,12 @@ import java.util.NoSuchElementException;
 //TODO: исключения
 //TODO: put, delete
 
-@RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/author")
+@RestController
 public class AuthorController {
 
     private final AuthorService authorService;
-
-    @Autowired
-    public AuthorController(AuthorService authorService) {
-        this.authorService = authorService;
-    }
 
     @PostMapping
     public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid CreateAuthorRequest createAuthorRequest) {
@@ -47,7 +43,8 @@ public class AuthorController {
 
         return authorService.getById(id)
                             .map(ResponseEntity::ok)
-                            .orElseThrow(() -> new NoSuchElementException("author not found"));
+                            .orElseThrow(() ->
+                                    new NoSuchElementException(String.format("Author with id '%s' not found", id)));
     }
 
     // TODO: if list is empty, should i return not_found or just return empty list?

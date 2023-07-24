@@ -4,6 +4,7 @@ import com.bookstore.catalogservice.dto.BookResponse;
 import com.bookstore.catalogservice.dto.CreateBookRequest;
 import com.bookstore.catalogservice.service.BookService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
@@ -18,16 +19,13 @@ import java.util.Optional;
 //TODO: исключения
 //TODO: put, delete
 
-@RestController
+
+@RequiredArgsConstructor
 @RequestMapping("/api/book")
+@RestController
 public class BookController {
 
     private final BookService bookService;
-
-    @Autowired
-    public BookController(BookService bookService) {
-        this.bookService = bookService;
-    }
 
     @PostMapping
     public ResponseEntity<BookResponse> createBook(@RequestBody @Valid CreateBookRequest createBookRequest) {
@@ -45,7 +43,7 @@ public class BookController {
     public ResponseEntity<BookResponse> getBook(@PathVariable String id) {
         return bookService.getById(id)
                           .map(ResponseEntity::ok)
-                          .orElseThrow(() -> new NoSuchElementException("book not found"));
+                          .orElseThrow(() -> new NoSuchElementException("Book not found"));
 
     }
 

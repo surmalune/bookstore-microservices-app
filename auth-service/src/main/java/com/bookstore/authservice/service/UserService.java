@@ -8,6 +8,7 @@ import com.bookstore.authservice.exception.EmailAlreadyExistsException;
 import com.bookstore.authservice.exception.UsernameAlreadyExistsException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -18,8 +19,8 @@ import java.time.Instant;
 import java.util.Set;
 
 @Service
-@Getter
 @RequiredArgsConstructor
+@Slf4j
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
@@ -29,30 +30,32 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
 
+        log.info("User with username {} loaded", username);
         return userRepository.findByUsername(username)
                              .orElseThrow(() -> new UsernameNotFoundException(
                                      String.format("User '%s' not found", username)
                              ));
     }
 
-    public UserDetails createUser(RegisterUserRequest registerUserRequest)
+    public UserDetails createUser(RegisterUserRequest request)
             throws  UsernameAlreadyExistsException,
                     EmailAlreadyExistsException {
 
-        if (userRepository.existsByUsername(registerUserRequest.getUsername()))
+        if (userRepository.existsByUsername(request.getUsername()))
             throw new UsernameAlreadyExistsException(
-                    String.format("Username '%s' already exists", registerUserRequest.getUsername())
+                    String.format("Username '%s' already exists", request.getUsername())
             );
 
-        if (userRepository.existsByEmail(registerUserRequest.getEmail()))
+        if (userRepository.existsByEmail(request.getEmail()))
             throw new EmailAlreadyExistsException(
-                    String.format("Email '%s' already exists", registerUserRequest.getEmail())
+                    String.format("Email '%s' already exists", request.getEmail())
             );
 
+        log.info("User with username {} registered", request.getUsername());
         User user = User.builder()
-                        .username(registerUserRequest.getUsername())
-                        .password(passwordEncoder.encode(registerUserRequest.getPassword()))
-                        .email(registerUserRequest.getEmail())
+                        .username(request.getUsername())
+                        .password(passwordEncoder.encode(request.getPassword()))
+                        .email(request.getEmail())
                         .createdAt(Instant.now())
                         .roles(Set.of(Role.USER))   // TODO: set roles
                         .build();

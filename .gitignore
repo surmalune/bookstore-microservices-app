@@ -9,3 +9,5 @@
 **/.mvn/
 **/mvnw
 **/mvnw.cmd
+
+**/lib/

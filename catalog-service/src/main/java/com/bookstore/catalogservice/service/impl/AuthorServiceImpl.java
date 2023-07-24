@@ -7,6 +7,8 @@ import com.bookstore.catalogservice.service.AuthorService;
 import com.bookstore.catalogservice.mapper.AuthorResponseAssembler;
 import com.bookstore.catalogservice.mapper.RequestMapper;
 import com.bookstore.catalogservice.repository.AuthorRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
+@RequiredArgsConstructor
 @Service
 public class AuthorServiceImpl implements AuthorService {
 
@@ -21,21 +25,12 @@ public class AuthorServiceImpl implements AuthorService {
     private final AuthorResponseAssembler authorResponseAssembler;
     private final RequestMapper requestMapper;
 
-    @Autowired
-    public AuthorServiceImpl(AuthorRepository authorRepository,
-                             AuthorResponseAssembler authorResponseAssembler,
-                             RequestMapper requestMapper) {
-        this.authorRepository = authorRepository;
-        this.authorResponseAssembler = authorResponseAssembler;
-        this.requestMapper = requestMapper;
-    }
-
     @Override
     public AuthorResponse createAuthor(CreateAuthorRequest createAuthorRequest) {
         Author author = requestMapper.toAuthor(createAuthorRequest);
         authorRepository.save(author);
 
-        //log.info("Author named {} is added", createAuthorRequest.getName());
+        log.info("Author with name '{}' added", createAuthorRequest.getName());
 
         return authorResponseAssembler.toModel(author);
     }
