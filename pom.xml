@@ -10,8 +10,10 @@
     <version>1.0-SNAPSHOT</version>
 
     <modules>
-        <module>catalog-service</module>
+        <module>discovery-service</module>
+        <module>gateway-service</module>
         <module>auth-service</module>
+        <module>catalog-service</module>
     </modules>
 
     <properties>

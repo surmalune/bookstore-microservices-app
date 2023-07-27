@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
 //TODO: put, delete
 
 @RequiredArgsConstructor
-@RequestMapping("/api/author")
+@RequestMapping("/catalog/author")
 @RestController
 public class AuthorController {
 

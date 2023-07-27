@@ -1,14 +1,13 @@
-server:
-  port: 8080
-jwt:
-  secret: eqSizeUB8H6FvDRzJsuKvzV4sKyR1xf5
-  expiration: 15m
 spring:
+  application:
+    name: @project.artifactId@
+
   datasource:
     url: jdbc:postgresql://localhost:5432/auth
     username: postgres
     password: root
     driver-class-name: org.postgresql.Driver
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -21,3 +20,17 @@ spring:
           unique_constraint_strategy: RECREATE_QUIETLY
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8083
+
+jwt:
+  secret: eqSizeUB8H6FvDRzJsuKvzV4sKyR1xf5
+  expiration: 15m
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost

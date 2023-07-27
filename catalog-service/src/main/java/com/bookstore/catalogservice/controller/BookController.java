@@ -21,7 +21,7 @@ import java.util.Optional;
 
 
 @RequiredArgsConstructor
-@RequestMapping("/api/book")
+@RequestMapping("/catalog/book")
 @RestController
 public class BookController {
 

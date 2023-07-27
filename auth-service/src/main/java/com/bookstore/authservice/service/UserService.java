@@ -24,6 +24,8 @@ import java.util.Set;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+
+    @Getter
     private final PasswordEncoder passwordEncoder;
 
     @Override

@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @NoArgsConstructor
@@ -45,7 +46,7 @@ public class User implements UserDetails {
             List<SimpleGrantedAuthority> authorities = role.getAuthorities().stream()
                                                            .map(Authority::getAuthority)
                                                            .map(SimpleGrantedAuthority::new)
-                                                           .toList();
+                                                           .collect(Collectors.toList());
             permissions.addAll(authorities);
         }
 

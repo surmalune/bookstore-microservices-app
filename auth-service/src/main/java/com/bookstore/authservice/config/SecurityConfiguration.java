@@ -31,7 +31,7 @@ public class SecurityConfiguration {
     {
         http.csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests((authz) -> authz
-                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/auth/**").permitAll()
 
                     .requestMatchers("/admin/**").hasRole(Role.ADMIN.name())
                     .requestMatchers("/user/**").hasRole(Role.USER.name())

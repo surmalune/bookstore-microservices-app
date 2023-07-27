@@ -1,13 +1,13 @@
-package com.bookstore.catalogservice;
+package com.bookstore.discoveryservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CatalogServiceApplicationTests {
+class DiscoveryServiceApplicationTests {
 
     @Test
-    void shouldCreateBook() {
-
+    void contextLoads() {
     }
+
 }
