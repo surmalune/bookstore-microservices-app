@@ -2,6 +2,11 @@ spring:
   application:
     name: @project.artifactId@
 
+  security:
+    user:
+      name: root
+      password: s3cr3t
+
 server:
   port: 8761
 
