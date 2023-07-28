@@ -43,7 +43,8 @@ public class BookController {
     public ResponseEntity<BookResponse> getBook(@PathVariable String id) {
         return bookService.getById(id)
                           .map(ResponseEntity::ok)
-                          .orElseThrow(() -> new NoSuchElementException("Book not found"));
+                          .orElseThrow(() ->
+                                  new NoSuchElementException(String.format("Book with id '%s' not found", id)));
 
     }
 

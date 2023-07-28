@@ -1,0 +1,23 @@
+server:
+  port:
+    8888
+
+spring:
+  application:
+    name: config-service
+
+  security:
+    user:
+      name: root
+      password: s3cr3t
+
+  profiles:
+    active: dev
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/surmalune/bookstore-config-repo
+          clone-on-start: true
+          default-label: master

@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
 public class AppExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ErrorMessage> usernameNotFoundException(NoSuchElementException exception) {
+    public ResponseEntity<ErrorMessage> notFoundElementException(NoSuchElementException exception) {
         log.warn(exception.getMessage(), exception);
 
         return ResponseEntity

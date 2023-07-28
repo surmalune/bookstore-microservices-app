@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: catalog-service
+
+  profiles:
+    active: dev
+
+  config:
+    import: optional:configserver:http://localhost:8888
+
+  cloud:
+    config:
+      username: root
+      password: s3cr3t
