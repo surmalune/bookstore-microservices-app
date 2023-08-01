@@ -3,13 +3,12 @@ package com.bookstore.catalogservice.service.impl;
 import com.bookstore.catalogservice.dto.AuthorResponse;
 import com.bookstore.catalogservice.dto.CreateAuthorRequest;
 import com.bookstore.catalogservice.entity.Author;
-import com.bookstore.catalogservice.service.AuthorService;
 import com.bookstore.catalogservice.mapper.AuthorResponseAssembler;
 import com.bookstore.catalogservice.mapper.RequestMapper;
 import com.bookstore.catalogservice.repository.AuthorRepository;
+import com.bookstore.catalogservice.service.AuthorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
 
@@ -26,11 +25,11 @@ public class AuthorServiceImpl implements AuthorService {
     private final RequestMapper requestMapper;
 
     @Override
-    public AuthorResponse createAuthor(CreateAuthorRequest createAuthorRequest) {
-        Author author = requestMapper.toAuthor(createAuthorRequest);
+    public AuthorResponse createAuthor(CreateAuthorRequest request) {
+        Author author = requestMapper.toAuthor(request);
         authorRepository.save(author);
 
-        log.info("Author with name '{}' added", createAuthorRequest.getName());
+        log.info("Author with name '{}' added", request.getName());
 
         return authorResponseAssembler.toModel(author);
     }

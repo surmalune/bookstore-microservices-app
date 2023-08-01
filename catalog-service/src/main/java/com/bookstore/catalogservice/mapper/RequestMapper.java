@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public abstract class RequestMapper {
 
+    @Autowired
     protected AuthorRepository authorRepository;
 
     public abstract Author toAuthor(CreateAuthorRequest createAuthorRequest);

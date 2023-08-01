@@ -1,0 +1,6 @@
+logging:
+  level:
+    web: INFO
+    root: INFO
+    org.springframework:
+      web: INFO

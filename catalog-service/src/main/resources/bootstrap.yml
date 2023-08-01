@@ -5,16 +5,16 @@ spring:
   profiles:
     active: dev
 
-  cloud:
-    config:
-      discovery:
-        enabled: true
-        service-id: config-service
-      profile: ${spring.profiles.active}
+  config:
+    import: optional:configserver:http://config:8888
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://root:s3cr3t@localhost:8761/eureka
+      defaultZone: http://root:s3cr3t@discovery:8761/eureka
   instance:
-    hostname: localhost
+    hostname: catalog
+
+logstash:
+  host: logstash
+  port: 5000

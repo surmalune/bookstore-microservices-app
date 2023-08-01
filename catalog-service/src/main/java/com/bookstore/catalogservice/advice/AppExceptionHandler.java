@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.NoSuchElementException;
 
+//TODO: add MethodArgumentNotValidException, HttpMessageNotReadableException, etc
+
 @Slf4j
 @RestControllerAdvice
 public class AppExceptionHandler {

@@ -1,0 +1,206 @@
+version: '3.9'
+
+services:
+  elasticsearch:
+    image: elasticsearch:8.8.1
+    container_name: elasticsearch
+    environment:
+      - "ES_JAVA_OPTS=-Xmx256m -Xms256m"
+      - xpack.security.enabled=false
+    ports:
+      - "9200:9200"
+    volumes:
+      - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    restart: on-failure
+    healthcheck:
+      test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
+      interval: 10s
+      timeout: 10s
+      retries: 50
+    networks:
+      - netbookstore
+
+  logstash:
+    image: logstash:8.8.1
+    container_name: logstash
+    volumes:
+      - ./elk/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./elk/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      XPACK_MONITORING_ENABLED: "true"
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - netbookstore
+    restart: on-failure
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9600" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
+  kibana:
+    image: kibana:8.8.1
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    networks:
+      - netbookstore
+    restart: on-failure
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      KEYCLOAK_DB_USER: keycloak
+      KEYCLOAK_DB_NAME: keycloakdb
+      KEYCLOAK_DB_PASSWORD: password
+      CATALOG_DB_USER: catalog
+      CATALOG_DB_PASSWORD: password
+      CATALOG_DB_NAME: catalogdb
+      PGDATA: /var/lib/postgresql/data/
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - netbookstore
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:20.0.2
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: keycloakdb
+      DB_USER: keycloak
+      DB_PASSWORD: password
+      DB_SCHEMA: public
+      KC_HEALTH_ENABLED: true
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./keycloak/bookstore-auth-realm.json:/opt/keycloak/data/import/bookstore-auth-realm.json
+    command: [ "start-dev", "--import-realm" ]
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
+      interval: 30s
+      timeout: 10s
+      retries: 50
+    networks:
+      - netbookstore
+
+  discovery:
+    container_name: discovery
+    build: ../discovery-service
+    ports:
+      - "8761:8761"
+    networks:
+      - netbookstore
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://root:s3cr3t@localhost:8761/actuator/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+    depends_on:
+      logstash:
+        condition: service_healthy
+
+  config:
+    container_name: config
+    build: ../config-service
+    ports:
+      - "8888:8888"
+    networks:
+      - netbookstore
+    restart: on-failure
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8888/actuator/health" ]
+      interval: 20s
+      timeout: 10s
+      retries: 10
+    depends_on:
+      logstash:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+
+  gateway:
+    container_name: gateway
+    build: ../gateway-service
+    ports:
+      - "8000:8000"
+    networks:
+      - netbookstore
+    restart: on-failure
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      config:
+        condition: service_healthy
+
+  catalog:
+    container_name: catalog
+    build: ../catalog-service
+    ports:
+      - "8081:8081"
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: catalogdb
+      DB_USER: catalog
+      DB_PASSWORD: password
+    networks:
+      - netbookstore
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      config:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  netbookstore:
+    driver: bridge
