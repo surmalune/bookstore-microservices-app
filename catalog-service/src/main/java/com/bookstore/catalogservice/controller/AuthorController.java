@@ -18,23 +18,23 @@ import java.util.NoSuchElementException;
 //TODO: put, delete
 
 @RequiredArgsConstructor
-@RequestMapping("/catalog/author")
+@RequestMapping("/author")
 @RestController
 public class AuthorController {
 
     private final AuthorService authorService;
 
     @PostMapping
-    public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid CreateAuthorRequest createAuthorRequest) {
+    public ResponseEntity<AuthorResponse> createAuthor(@RequestBody @Valid CreateAuthorRequest request) {
 
-        AuthorResponse authorResponse = authorService.createAuthor(createAuthorRequest);
+        AuthorResponse response = authorService.createAuthor(request);
 
         URI location = MvcUriComponentsBuilder.fromController(getClass())
                                               .path("/{id}")
-                                              .buildAndExpand(authorResponse.getId())
+                                              .buildAndExpand(response.getId())
                                               .toUri();
 
-        return ResponseEntity.created(location).body(authorResponse);
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/{id}")

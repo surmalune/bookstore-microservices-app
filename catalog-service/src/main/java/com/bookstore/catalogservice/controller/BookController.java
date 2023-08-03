@@ -5,7 +5,6 @@ import com.bookstore.catalogservice.dto.CreateBookRequest;
 import com.bookstore.catalogservice.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,33 +13,34 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 
 import java.net.URI;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 //TODO: исключения
 //TODO: put, delete
 
 
 @RequiredArgsConstructor
-@RequestMapping("/catalog/book")
+@RequestMapping("/book")
 @RestController
 public class BookController {
 
     private final BookService bookService;
 
     @PostMapping
-    public ResponseEntity<BookResponse> createBook(@RequestBody @Valid CreateBookRequest createBookRequest) {
-        BookResponse bookResponse = bookService.createBook(createBookRequest);
+    public ResponseEntity<BookResponse> createBook(@RequestBody @Valid CreateBookRequest request) {
+        BookResponse response = bookService.createBook(request);
 
         URI location = MvcUriComponentsBuilder.fromController(getClass())
                                               .path("/{id}")
-                                              .buildAndExpand(bookResponse.getId())
+                                              .buildAndExpand(response.getId())
                                               .toUri();
 
-        return ResponseEntity.created(location).body(bookResponse);
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookResponse> getBook(@PathVariable String id) {
+    public ResponseEntity<BookResponse> getBook(@PathVariable String id)
+            throws NoSuchElementException {
+
         return bookService.getById(id)
                           .map(ResponseEntity::ok)
                           .orElseThrow(() ->

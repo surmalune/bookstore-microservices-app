@@ -4,7 +4,7 @@ server:
 
 spring:
   application:
-    name: config-service
+    name: config
 
   profiles:
     active: dev

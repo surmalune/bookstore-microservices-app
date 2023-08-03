@@ -3,13 +3,14 @@ package com.bookstore.catalogservice.service.impl;
 import com.bookstore.catalogservice.dto.BookResponse;
 import com.bookstore.catalogservice.dto.CreateBookRequest;
 import com.bookstore.catalogservice.entity.Book;
+import com.bookstore.catalogservice.exception.AuthorNotFoundException;
 import com.bookstore.catalogservice.mapper.BookResponseAssembler;
 import com.bookstore.catalogservice.mapper.RequestMapper;
 import com.bookstore.catalogservice.repository.BookRepository;
+import com.bookstore.catalogservice.service.AuthorService;
 import com.bookstore.catalogservice.service.BookService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.stereotype.Service;
 
@@ -25,13 +26,23 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final BookResponseAssembler bookResponseAssembler;
     private final RequestMapper requestMapper;
+    private final AuthorService authorService;
 
     @Override
-    public BookResponse createBook(CreateBookRequest createBookRequest) {
-        Book book = requestMapper.toBook(createBookRequest);
+    public BookResponse createBook(CreateBookRequest request)
+            throws AuthorNotFoundException {
+
+        request.getAuthorIds()
+               .forEach(id -> authorService.getById(id)
+                                           .orElseThrow(() ->
+                                                   new AuthorNotFoundException(String.format(
+                                                           "Author with id '%s' not found", id)
+                                                   )));
+
+        Book book = requestMapper.toBook(request);
         bookRepository.save(book);
 
-        log.info("Book {} saved", createBookRequest.getTitle());
+        log.info("Book {} saved", request.getTitle());
 
         return bookResponseAssembler.toModel(book);
     }

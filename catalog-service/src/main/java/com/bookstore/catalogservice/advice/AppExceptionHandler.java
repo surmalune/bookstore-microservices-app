@@ -1,6 +1,7 @@
 package com.bookstore.catalogservice.advice;
 
 import com.bookstore.catalogservice.dto.ErrorMessage;
+import com.bookstore.catalogservice.exception.AuthorNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,15 @@ public class AppExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
     public ResponseEntity<ErrorMessage> notFoundElementException(NoSuchElementException exception) {
+        log.warn(exception.getMessage(), exception);
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(new ErrorMessage(exception.getMessage()));
+    }
+
+    @ExceptionHandler(AuthorNotFoundException.class)
+    public ResponseEntity<ErrorMessage> notFoundAuthorException(AuthorNotFoundException exception) {
         log.warn(exception.getMessage(), exception);
 
         return ResponseEntity
