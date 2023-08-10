@@ -79,6 +79,12 @@ services:
       CATALOG_DB_USER: catalog
       CATALOG_DB_PASSWORD: password
       CATALOG_DB_NAME: catalogdb
+      CART_DB_USER: cart
+      CART_DB_PASSWORD: password
+      CART_DB_NAME: cartdb
+#      ORDER_DB_USER: orders
+#      ORDER_DB_PASSWORD: password
+#      ORDER_DB_NAME: orderdb
       PGDATA: /var/lib/postgresql/data/
     restart: on-failure
     healthcheck:
@@ -183,6 +189,30 @@ services:
       DB_ADDR: postgres
       DB_DATABASE: catalogdb
       DB_USER: catalog
+      DB_PASSWORD: password
+    networks:
+      - netbookstore
+    restart: on-failure
+    depends_on:
+      postgres:
+        condition: service_healthy
+      logstash:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      config:
+        condition: service_healthy
+
+  cart:
+    container_name: cart
+    build: ../cart-service
+    expose:
+      - "8082"
+    environment:
+      DB_VENDOR: POSTGRES
+      DB_ADDR: postgres
+      DB_DATABASE: cartdb
+      DB_USER: cart
       DB_PASSWORD: password
     networks:
       - netbookstore

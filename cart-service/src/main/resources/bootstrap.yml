@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: cart
+
+  profiles:
+    active: dev
+
+  config:
+    import: optional:configserver:http://config:8888
+
+#  cloud:
+#    openfeign:
+#      oauth2:
+#        enabled: true
+#        clientRegistrationId: keycloak
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://root:s3cr3t@discovery:8761/eureka
+  instance:
+    hostname: cart
+
+logstash:
+  host: logstash
+  port: 5000

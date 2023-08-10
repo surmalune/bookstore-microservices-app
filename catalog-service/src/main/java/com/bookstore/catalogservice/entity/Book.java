@@ -8,6 +8,8 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Set;
 
+//TODO: add genre, photo, publishing house, publication date
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

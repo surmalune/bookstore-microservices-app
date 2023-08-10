@@ -14,7 +14,6 @@ import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBui
 import java.net.URI;
 import java.util.NoSuchElementException;
 
-//TODO: исключения
 //TODO: put, delete
 
 @RequiredArgsConstructor
@@ -47,7 +46,6 @@ public class AuthorController {
                                     new NoSuchElementException(String.format("Author with id '%s' not found", id)));
     }
 
-    // TODO: if list is empty, should i return not_found or just return empty list?
     @GetMapping
     public ResponseEntity<CollectionModel<AuthorResponse>> listAuthors() {
         return new ResponseEntity<>(

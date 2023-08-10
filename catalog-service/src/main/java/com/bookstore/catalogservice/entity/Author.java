@@ -7,6 +7,7 @@ import org.hibernate.annotations.GenericGenerator;
 import java.io.Serializable;
 import java.util.Set;
 
+//TODO: add photo, age
 
 @NoArgsConstructor
 @AllArgsConstructor

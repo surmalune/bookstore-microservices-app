@@ -1,0 +1,7 @@
+logging:
+  level:
+    root: DEBUG
+    web: DEBUG
+    org:
+      springframework:
+        security: DEBUG

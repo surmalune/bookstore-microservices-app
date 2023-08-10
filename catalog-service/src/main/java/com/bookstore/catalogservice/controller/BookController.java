@@ -5,19 +5,20 @@ import com.bookstore.catalogservice.dto.CreateBookRequest;
 import com.bookstore.catalogservice.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
+import java.math.BigDecimal;
 import java.net.URI;
 import java.util.NoSuchElementException;
 
-//TODO: исключения
 //TODO: put, delete
 
-
+@Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/book")
 @RestController
@@ -45,7 +46,19 @@ public class BookController {
                           .map(ResponseEntity::ok)
                           .orElseThrow(() ->
                                   new NoSuchElementException(String.format("Book with id '%s' not found", id)));
+    }
 
+    @GetMapping("/{id}/price")
+    public ResponseEntity<BigDecimal> getPrice(@PathVariable String id)
+            throws NoSuchElementException {
+
+        log.info("*** im in book controller ***");
+
+        return bookService.getById(id)
+                          .map(BookResponse::getPrice)
+                          .map(ResponseEntity::ok)
+                          .orElseThrow(() ->
+                                  new NoSuchElementException(String.format("Book with id '%s' not found", id)));
     }
 
     @GetMapping

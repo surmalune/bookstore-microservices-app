@@ -11,3 +11,5 @@
 **/mvnw.cmd
 
 **/lib/
+order-service/
+**/order_init.sh
