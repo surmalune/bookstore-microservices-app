@@ -4,6 +4,7 @@ import com.bookstore.catalogservice.dto.BookResponse;
 import com.bookstore.catalogservice.dto.CreateBookRequest;
 import com.bookstore.catalogservice.service.BookService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.hateoas.CollectionModel;
@@ -52,10 +53,19 @@ public class BookController {
     public ResponseEntity<BigDecimal> getPrice(@PathVariable String id)
             throws NoSuchElementException {
 
-        log.info("*** im in book controller ***");
-
         return bookService.getById(id)
                           .map(BookResponse::getPrice)
+                          .map(ResponseEntity::ok)
+                          .orElseThrow(() ->
+                                  new NoSuchElementException(String.format("Book with id '%s' not found", id)));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<BookResponse> changePrice(@PathVariable String id,
+                                                    @RequestBody @Min(value = 0) BigDecimal price)
+            throws NoSuchElementException {
+
+        return bookService.changePrice(id, price)
                           .map(ResponseEntity::ok)
                           .orElseThrow(() ->
                                   new NoSuchElementException(String.format("Book with id '%s' not found", id)));

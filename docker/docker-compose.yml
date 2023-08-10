@@ -7,22 +7,26 @@ services:
     environment:
       - "ES_JAVA_OPTS=-Xmx256m -Xms256m"
       - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
     volumes:
       - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - "9200:9200"
+    networks:
+      - netbookstore
     restart: on-failure
     healthcheck:
       test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
       interval: 10s
       timeout: 10s
       retries: 50
-    networks:
-      - netbookstore
 
   logstash:
     image: logstash:8.8.1
     container_name: logstash
+    environment:
+      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
+      XPACK_MONITORING_ENABLED: "true"
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     volumes:
       - ./elk/logstash.yml:/usr/share/logstash/config/logstash.yml
       - ./elk/pipeline:/usr/share/logstash/pipeline:ro
@@ -31,30 +35,26 @@ services:
       - "5000:5000/tcp"
       - "5000:5000/udp"
       - "9600:9600"
-    environment:
-      XPACK_MONITORING_ELASTICSEARCH_HOSTS: "http://elasticsearch:9200"
-      XPACK_MONITORING_ENABLED: "true"
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
     networks:
       - netbookstore
     restart: on-failure
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9600" ]
       interval: 10s
       timeout: 10s
       retries: 10
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 
   kibana:
     image: kibana:8.8.1
     container_name: kibana
-    ports:
-      - "5601:5601"
     environment:
       ELASTICSEARCH_URL: http://elasticsearch:9200
       ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    ports:
+      - "5601:5601"
     networks:
       - netbookstore
     restart: on-failure
@@ -63,13 +63,8 @@ services:
         condition: service_healthy
 
   postgres:
-    container_name: postgres
     image: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - ./postgres:/docker-entrypoint-initdb.d
-      - postgres_data:/var/lib/postgresql/data
+    container_name: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -82,22 +77,24 @@ services:
       CART_DB_USER: cart
       CART_DB_PASSWORD: password
       CART_DB_NAME: cartdb
-#      ORDER_DB_USER: orders
-#      ORDER_DB_PASSWORD: password
-#      ORDER_DB_NAME: orderdb
       PGDATA: /var/lib/postgresql/data/
+    volumes:
+      - ./postgres:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - netbookstore
     restart: on-failure
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - netbookstore
 
   keycloak:
-    container_name: keycloak
     image: quay.io/keycloak/keycloak:20.0.2
+    container_name: keycloak
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -108,26 +105,60 @@ services:
       DB_PASSWORD: password
       DB_SCHEMA: public
       KC_HEALTH_ENABLED: true
-    ports:
-      - "8080:8080"
     volumes:
       - ./keycloak/bookstore-auth-realm.json:/opt/keycloak/data/import/bookstore-auth-realm.json
     command: [ "start-dev", "--import-realm" ]
+    ports:
+      - "8080:8080"
+    networks:
+      - netbookstore
     restart: on-failure
-    depends_on:
-      postgres:
-        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
       interval: 30s
       timeout: 10s
       retries: 50
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    container_name: zookeeper
+    hostname: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
     networks:
       - netbookstore
+    restart: on-failure
+
+  kafka:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: kafka
+    hostname: kafka
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    networks:
+      - netbookstore
+    restart: on-failure
+    healthcheck:
+      test: nc -z localhost 9092 || exit -1
+      start_period: 15s
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    depends_on:
+      - zookeeper
 
   discovery:
-    container_name: discovery
     build: ../discovery-service
+    container_name: discovery
     ports:
       - "8761:8761"
     networks:
@@ -143,8 +174,8 @@ services:
         condition: service_healthy
 
   config:
-    container_name: config
     build: ../config-service
+    container_name: config
     ports:
       - "8888:8888"
     networks:
@@ -162,8 +193,8 @@ services:
         condition: service_healthy
 
   gateway:
-    container_name: gateway
     build: ../gateway-service
+    container_name: gateway
     ports:
       - "8000:8000"
     networks:
@@ -180,16 +211,16 @@ services:
         condition: service_healthy
 
   catalog:
-    container_name: catalog
     build: ../catalog-service
-    expose:
-      - "8081"
+    container_name: catalog
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
       DB_DATABASE: catalogdb
       DB_USER: catalog
       DB_PASSWORD: password
+    expose:
+      - "8081"
     networks:
       - netbookstore
     restart: on-failure
@@ -202,18 +233,20 @@ services:
         condition: service_healthy
       config:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   cart:
-    container_name: cart
     build: ../cart-service
-    expose:
-      - "8082"
+    container_name: cart
     environment:
       DB_VENDOR: POSTGRES
       DB_ADDR: postgres
       DB_DATABASE: cartdb
       DB_USER: cart
       DB_PASSWORD: password
+    expose:
+      - "8082"
     networks:
       - netbookstore
     restart: on-failure
@@ -225,6 +258,8 @@ services:
       discovery:
         condition: service_healthy
       config:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
 
 volumes:
