@@ -25,6 +25,8 @@ This project was created for educational purposes in order to try out various we
 ## Tools I plan to use
 
 - JUnit, Mockito, TestContainers
+- Spring Cloud Circuit Breaker
+- Resilience4j
 - Prometheus
 - Caffeine
 
