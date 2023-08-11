@@ -25,10 +25,11 @@ This project was created for educational purposes in order to try out various we
 ## Tools I plan to use
 
 - JUnit, Mockito, TestContainers
+- Spring Cloud Sleuth
 - Spring Cloud Circuit Breaker
 - Resilience4j
-- Prometheus
-- Caffeine
+- Prometheus, Grafana
+- Caffeine, Redis
 
 ## Services I plan to add
 
@@ -37,5 +38,11 @@ This project was created for educational purposes in order to try out various we
 - checkout-service
 - payment-service
 - order-service
+- customer-service
+- delivery-service
+- recommendation-service
 - review-service
 - notification-service
+- search-service
+- promotion-service
+- analytics-service
